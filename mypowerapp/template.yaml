@@ -1,0 +1,228 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+labels:
+  app: a-cloud-app
+  template: a-cloud-app
+message: |-
+  The cloud services you requested have been created in your project.
+metadata:
+  annotations:
+    description: An example of how a cloud services can easily be created at your own datacenter
+    iconClass: icon-wordpress
+    openshift.io/display-name: A container two-tier App
+    openshift.io/documentation-url: https://github.com/sclorg/httpd-ex
+    openshift.io/long-description: This template defines resources needed to deploy
+      a static application served by a LAMP stack, including a database
+      configuration and application deployment configuration.
+    openshift.io/provider-display-name: Daniel Casali
+    openshift.io/support-url: https://dancasali.com
+    samples.operator.openshift.io/version: 4.10.6
+    tags: quickstart
+    template.openshift.io/bindable: "false"
+  labels:
+    samples.operator.openshift.io/managed: "true"
+  name: a-cloud-app
+  namespace: openshift
+objects:
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      deployment.kubernetes.io/revision: "1"
+    labels:
+      app: backend
+      app.kubernetes.io/component: backend
+      app.kubernetes.io/instance: backend
+      app.kubernetes.io/name: backend
+      app.kubernetes.io/part-of: mypowerapp
+      app.openshift.io/runtime: backend
+    name: backend
+  spec:
+    selector:
+      matchLabels:
+        app: backend
+    template:
+      metadata:
+        labels:
+          app: backend
+          deploymentconfig: backend
+      spec:
+        containers:
+        - image: quay.io/daniel_casali/powerbackend:latest
+          imagePullPolicy: Always
+          name: backend
+          resources:
+            requests:
+              cpu: 0.1
+          env:
+          - name: MYSQL_DATABASE
+            value: wordpress
+          - name: MYSQL_ROOT_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: mysql-pass
+                key: password
+          ports:
+          - containerPort: 3306
+            protocol: TCP
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /var/lib/mysql
+            name: mariadb-1
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        terminationGracePeriodSeconds: 30
+        volumes:
+        - emptyDir: {}
+          name: mariadb-1
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      app: backend
+      app.kubernetes.io/component: backend
+      app.kubernetes.io/instance: backend
+      app.kubernetes.io/name: backend
+      app.kubernetes.io/part-of: mypowerapp
+      app.openshift.io/runtime-version: latest
+    name: backend
+  spec:
+    ports:
+    - name: 3306-tcp
+      port: 3306
+      protocol: TCP
+      targetPort: 3306
+    selector:
+      app: backend
+      deploymentconfig: backend
+    type: ClusterIP
+- apiVersion: v1
+  data:
+    password: cGFzc3cwcmQ=
+  kind: Secret
+  metadata:
+    name: mysql-pass
+  type: Opaque
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      app.openshift.io/route-disabled: "false"
+      deployment.kubernetes.io/revision: "1"
+    labels:
+      app: frontend
+      app.kubernetes.io/component: frontend
+      app.kubernetes.io/instance: frontend
+      app.kubernetes.io/name: frontend
+      app.kubernetes.io/part-of: mypowerapp
+      app.openshift.io/runtime: frontend
+    name: frontend
+  spec:
+    selector:
+      matchLabels:
+        app: frontend
+    template:
+      metadata:
+        labels:
+          app: frontend
+          deploymentconfig: frontend
+      spec:
+        initContainers:
+          - image: quay.io/daniel_casali/powerbackend:latest
+            imagePullPolicy: Always
+            name: loadbackend
+            env:
+              - name: WORDPRESS_DB_HOST
+                value: backend
+              - name: CORRECT_ROUTE
+                value: ${NEW_ROUTE}
+              - name: WORDPRESS_DB_NAME
+                value: wordpress
+              - name: WORDPRESS_DB_USER
+                value: root
+              - name: WORDPRESS_DB_PASSWORD
+                valueFrom:
+                  secretKeyRef:
+                    name: mysql-pass
+                    key: password
+            command:
+              - "/bin/bash"
+              - "-c"
+              - 'until mysql --host=${WORDPRESS_DB_HOST} --user=${WORDPRESS_DB_USER} --password=${WORDPRESS_DB_PASSWORD} --execute="SELECT 1;"; do echo waiting for mysql; sleep 2; done; sed "s/wordpress-wordpress.apps.rdr-rhop-6e083f.169.54.112.242.sslip.io/${CORRECT_ROUTE}/g" /tmp/wordpress.dump >/tmp/wordpress.dump2 ; mysql --host=${WORDPRESS_DB_HOST} --user=${WORDPRESS_DB_USER} --password=${WORDPRESS_DB_PASSWORD} </tmp/wordpress.dump2'
+        containers:
+        - image: quay.io/daniel_casali/powerfrontend:latest
+          imagePullPolicy: Always
+          env:
+            - name: WORDPRESS_DB_HOST
+              value: backend
+            - name: WORDPRESS_DB_NAME
+              value: wordpress
+            - name: WORDPRESS_DB_USER
+              value: root
+            - name: WORDPRESS_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-pass
+                  key: password
+          name: wordpress
+          ports:
+          - containerPort: 8080
+            protocol: TCP
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      app: frontend
+      app.kubernetes.io/component: frontend
+      app.kubernetes.io/instance: frontend
+      app.kubernetes.io/name: frontend
+      app.kubernetes.io/part-of: mypowerapp
+      app.openshift.io/runtime-version: latest
+    name: frontend
+  spec:
+    ports:
+    - name: 80-tcp
+      port: 80
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      app: frontend
+      deploymentconfig: frontend
+    sessionAffinity: None
+    type: ClusterIP
+- apiVersion: route.openshift.io/v1
+  kind: Route
+  metadata:
+    annotations:
+      openshift.io/host.generated: "true"
+    labels:
+      app: frontend
+      app.kubernetes.io/component: frontend
+      app.kubernetes.io/instance: frontend
+      app.kubernetes.io/name: frontend
+      app.kubernetes.io/part-of: mypowerapp
+      app.openshift.io/runtime-version: latest
+    name: frontend
+  spec:
+    host: ${NEW_ROUTE}
+    port:
+      targetPort: 80-tcp
+    tls:
+      insecureEdgeTerminationPolicy: Redirect
+      termination: edge
+    to:
+      kind: Service
+      name: frontend
+      weight: 100
+    wildcardPolicy: None
+parameters:
+- description: The URL assigned to the Application defined in this template.
+  displayName: URL
+  name: NEW_ROUTE
+  required: true
+  value: route.apps.clustername.domain

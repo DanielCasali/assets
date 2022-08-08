@@ -1,0 +1,24 @@
+  apiVersion: route.openshift.io/v1
+  kind: Route
+  metadata:
+    annotations:
+      openshift.io/host.generated: "true"
+    labels:
+      app: frontend
+      app.kubernetes.io/component: frontend
+      app.kubernetes.io/instance: frontend
+      app.kubernetes.io/name: frontend
+      app.kubernetes.io/part-of: mypowerapp
+      app.openshift.io/runtime-version: latest
+    name: frontend
+  spec:
+    host: ROUTE_MYAPP_POWER
+    port:
+      targetPort: 80-tcp
+    tls:
+      insecureEdgeTerminationPolicy: Redirect
+      termination: edge
+    to:
+      kind: Service
+      name: frontend
+      weight: 100

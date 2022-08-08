@@ -1,0 +1,48 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  annotations:
+    app.openshift.io/route-disabled: "false"
+    deployment.kubernetes.io/revision: "1"
+  labels:
+    app: init-database
+    app.kubernetes.io/component: init-database
+    app.kubernetes.io/instance: init-database
+    app.kubernetes.io/name: init-database
+    app.kubernetes.io/part-of: mypowerapp
+    app.openshift.io/runtime: init-database
+    app.openshift.io/runtime-namespace: application
+  name: init-database
+spec:
+  backoffLimit: 6
+  completionMode: NonIndexed
+  completions: 1
+  parallelism: 1
+  suspend: false
+  template:
+    metadata:
+      name: init-database
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - image: quay.io/daniel_casali/powerbackend:latest
+          imagePullPolicy: Always
+          name: loadbackend
+          env:
+            - name: WORDPRESS_DB_HOST
+              value: backend
+            - name: WORDPRESS_DB_NAME
+              value: wordpress
+            - name: WORDPRESS_DB_USER
+              value: root
+            - name: CORRECT_ROUTE
+              value: ROUTE_MYAPP_POWER
+            - name: WORDPRESS_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-pass
+                  key: password
+          command:
+            - "/bin/bash"
+            - "-c"
+            - 'until mysql --host=${WORDPRESS_DB_HOST} --user=${WORDPRESS_DB_USER} --password=${WORDPRESS_DB_PASSWORD} --execute="SELECT 1;"; do echo waiting for mysql; sleep 2; done; sed "s/wordpress-wordpress.apps.rdr-rhop-6e083f.169.54.112.242.sslip.io/${CORRECT_ROUTE}/g" /tmp/wordpress.dump >/tmp/wordpress.dump2 ; mysql --host=${WORDPRESS_DB_HOST} --user=${WORDPRESS_DB_USER} --password=${WORDPRESS_DB_PASSWORD} </tmp/wordpress.dump2' 
