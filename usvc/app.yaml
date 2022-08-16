@@ -19,6 +19,8 @@ metadata:
   name: carts
   labels:
     name: carts
+    app.kubernetes.io/name: carts
+    app.kubernetes.io/part-of: microservice
   namespace: sock-shop
 spec:
   replicas: 1
@@ -82,6 +84,8 @@ metadata:
   name: carts-db
   labels:
     name: carts-db
+    app.kubernetes.io/name: carts-db
+    app.kubernetes.io/part-of: microservice
   namespace: sock-shop
 spec:
   replicas: 1
@@ -136,6 +140,8 @@ metadata:
   name: catalogue
   labels:
     name: catalogue
+    app.kubernetes.io/name: catalogue
+    app.kubernetes.io/part-of: microservice
   namespace: sock-shop
 spec:
   replicas: 1
@@ -203,6 +209,8 @@ metadata:
   name: catalogue-db
   labels:
     name: catalogue-db
+    app.kubernetes.io/name: catalogue-db
+    app.kubernetes.io/part-of: microservice
   namespace: sock-shop
 spec:
   replicas: 1
@@ -256,6 +264,9 @@ kind: Deployment
 metadata:
   name: front-end
   namespace: sock-shop
+  labels:
+    app.kubernetes.io/name: front-end
+    app.kubernetes.io/part-of: microservice
 spec:
   replicas: 1
   selector:
@@ -344,6 +355,8 @@ metadata:
   name: orders
   labels:
     name: orders
+    app.kubernetes.io/name: orders
+    app.kubernetes.io/part-of: microservice
   namespace: sock-shop
 spec:
   replicas: 1
@@ -407,6 +420,8 @@ metadata:
   name: orders-db
   labels:
     name: orders-db
+    app.kubernetes.io/name: orders-db
+    app.kubernetes.io/part-of: microservice
   namespace: sock-shop
 spec:
   replicas: 1
@@ -460,6 +475,8 @@ metadata:
   name: payment
   labels:
     name: payment
+    app.kubernetes.io/name: payment
+    app.kubernetes.io/part-of: microservice
   namespace: sock-shop
 spec:
   replicas: 1
@@ -525,6 +542,8 @@ metadata:
   name: queue-master
   labels:
     name: queue-master
+    app.kubernetes.io/name: queue-master
+    app.kubernetes.io/part-of: microservice
   namespace: sock-shop
 spec:
   replicas: 1
@@ -580,6 +599,8 @@ metadata:
   name: rabbitmq
   labels:
     name: rabbitmq
+    app.kubernetes.io/name: rabbitmq
+    app.kubernetes.io/part-of: microservice
   namespace: sock-shop
 spec:
   replicas: 1
@@ -656,6 +677,8 @@ metadata:
   name: session-db
   labels:
     name: session-db
+    app.kubernetes.io/name: session-db
+    app.kubernetes.io/part-of: microservice
   namespace: sock-shop
 spec:
   replicas: 1
@@ -704,6 +727,8 @@ metadata:
   name: shipping
   labels:
     name: shipping
+    app.kubernetes.io/name: shipping
+    app.kubernetes.io/part-of: microservice
   namespace: sock-shop
 spec:
   replicas: 1
@@ -770,6 +795,8 @@ metadata:
   name: user
   labels:
     name: user
+    app.kubernetes.io/name: user
+    app.kubernetes.io/part-of: microservice
   namespace: sock-shop
 spec:
   replicas: 1
@@ -839,6 +866,8 @@ metadata:
   name: user-db
   labels:
     name: user-db
+    app.kubernetes.io/name: user-db
+    app.kubernetes.io/part-of: microservice
   namespace: sock-shop
 spec:
   replicas: 1
