@@ -311,6 +311,13 @@ spec:
             port: 8080
           initialDelaySeconds: 30
           periodSeconds: 3
+        volumeMounts:
+        - mountPath: /data
+          name: data-volume
+      volumes:
+        - name: data-volume
+          emptyDir:
+            medium: Memory
       nodeSelector:
         kubernetes.io/os: linux
 ---
