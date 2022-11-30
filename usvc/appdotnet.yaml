@@ -372,19 +372,19 @@ spec:
       - name: orders
         image: quay.io/daniel_casali/usvc-ordersdotnet
         env:
-         - name: MONO_LOG_LEVEL
+         - name: NOT_MONO_LOG_LEVEL
            value: debug
-         - name: MONO_LOG_MASK
+         - name: NOT_MONO_LOG_MASK
            value: asm
         resources:
           limits:
-            cpu: 500m
-            memory: 500Mi
+            cpu: 5000m
+            memory: 5000Mi
           requests:
-            cpu: 100m
-            memory: 300Mi
+            cpu: 1000m
+            memory: 1000Mi
         ports:
-        - containerPort: 8080
+        - containerPort: 60014
         securityContext:
           runAsNonRoot: true
           runAsUser: 10001
@@ -394,18 +394,33 @@ spec:
           name: dotnet-volume
         - mountPath: /.nuget
           name: nuget-volume
+        - mountPath: /app/bin/Debug
+          name: debug-volume
+        - mountPath: /app/obj
+          name: obj-volume
+        - mountPath: /.local
+          name: local-volume
         - mountPath: /tmp
           name: tmp-volume
       volumes:
-        - name: dotnet-volume
-          emptyDir:
-            medium: Memory
-        - name: nuget-volume
-          emptyDir:
-            medium: Memory
-        - name: tmp-volume
-          emptyDir:
-            medium: Memory
+      - emptyDir:
+          medium: Memory
+        name: dotnet-volume
+      - emptyDir:
+          medium: Memory
+        name: debug-volume
+      - emptyDir:
+          medium: Memory
+        name: nuget-volume
+      - emptyDir:
+          medium: Memory
+        name: obj-volume
+      - emptyDir:
+          medium: Memory
+        name: local-volume
+      - emptyDir:
+          medium: Memory
+        name: tmp-volume
       nodeSelector:
         kubernetes.io/os: linux
 ---
@@ -422,7 +437,7 @@ spec:
   ports:
     # the port that this service should serve on
   - port: 80
-    targetPort: 8080
+    targetPort: 60014
   selector:
     name: orders
 ---
