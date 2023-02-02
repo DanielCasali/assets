@@ -1,0 +1,242 @@
+apiVersion: v1
+kind: List
+metadata:
+  resourceVersion: ""
+  selfLink: ""
+items:
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      service: cart
+    name: cart
+    namespace: robot-shop
+  spec:
+    ports:
+    - name: http
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      service: cart
+    sessionAffinity: None
+    type: ClusterIP
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      service: catalogue
+    name: catalogue
+    namespace: robot-shop
+  spec:
+    ports:
+    - name: http
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      service: catalogue
+    sessionAffinity: None
+    type: ClusterIP
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      service: dispatch
+    name: dispatch
+    namespace: robot-shop
+  spec:
+    ports:
+    - name: headless
+      port: 55555
+      protocol: TCP
+      targetPort: 55555
+    selector:
+      service: dispatch
+    sessionAffinity: None
+    type: ClusterIP
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      service: mongodb
+    name: mongodb
+    namespace: robot-shop
+  spec:
+    internalTrafficPolicy: Cluster
+    ipFamilyPolicy: SingleStack
+    ports:
+    - name: mongo
+      port: 27017
+      protocol: TCP
+      targetPort: 27017
+    selector:
+      service: mongodb
+    sessionAffinity: None
+    type: ClusterIP
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      app.kubernetes.io/managed-by: Helm
+      service: mysql
+    name: mysql
+    namespace: robot-shop
+  spec:
+    internalTrafficPolicy: Cluster
+    ipFamilyPolicy: SingleStack
+    ports:
+    - name: mysql
+      port: 3306
+      protocol: TCP
+      targetPort: 3306
+    selector:
+      service: mysql
+    sessionAffinity: None
+    type: ClusterIP
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      service: payment
+    name: payment
+    namespace: robot-shop
+  spec:
+    internalTrafficPolicy: Cluster
+    ipFamilies:
+    - IPv4
+    ipFamilyPolicy: SingleStack
+    ports:
+    - name: http
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      service: payment
+    sessionAffinity: None
+    type: ClusterIP
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      service: rabbitmq
+    name: rabbitmq
+    namespace: robot-shop
+  spec:
+    internalTrafficPolicy: Cluster
+    ipFamilyPolicy: SingleStack
+    ports:
+    - name: tcp-amqp
+      port: 5672
+      protocol: TCP
+      targetPort: 5672
+    - name: http-management
+      port: 15672
+      protocol: TCP
+      targetPort: 15672
+    - name: tcp-epmd
+      port: 4369
+      protocol: TCP
+      targetPort: 4369
+    selector:
+      service: rabbitmq
+    sessionAffinity: None
+    type: ClusterIP
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      service: ratings
+    name: ratings
+    namespace: robot-shop
+  spec:
+    internalTrafficPolicy: Cluster
+    ipFamilies:
+    - IPv4
+    ipFamilyPolicy: SingleStack
+    ports:
+    - name: http
+      port: 80
+      protocol: TCP
+      targetPort: 80
+    selector:
+      service: ratings
+    sessionAffinity: None
+    type: ClusterIP
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      service: redis
+    name: redis
+    namespace: robot-shop
+  spec:
+    internalTrafficPolicy: Cluster
+    ipFamilies:
+    - IPv4
+    ipFamilyPolicy: SingleStack
+    ports:
+    - name: redis
+      port: 6379
+      protocol: TCP
+      targetPort: 6379
+    selector:
+      service: redis
+    sessionAffinity: None
+    type: ClusterIP
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      service: shipping
+    name: shipping
+    namespace: robot-shop
+  spec:
+    internalTrafficPolicy: Cluster
+    ipFamilyPolicy: SingleStack
+    ports:
+    - name: http
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      service: shipping
+    sessionAffinity: None
+    type: ClusterIP
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      service: user
+    name: user
+    namespace: robot-shop
+  spec:
+    internalTrafficPolicy: Cluster
+    ipFamilyPolicy: SingleStack
+    ports:
+    - name: http
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      service: user
+    sessionAffinity: None
+    type: ClusterIP
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      service: web
+    name: web
+    namespace: robot-shop
+  spec:
+    internalTrafficPolicy: Cluster
+    ipFamilyPolicy: SingleStack
+    ports:
+    - port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      service: web
+    sessionAffinity: None
+    type: ClusterIP
