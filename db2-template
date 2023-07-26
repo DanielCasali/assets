@@ -1,0 +1,142 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+labels:
+  app: a-db2
+  template: a-db2
+message: |-
+  The cloud services you requested have been created in your project.
+metadata:
+  annotations:
+    description: Quick and dirty DB2 Community Edition
+    iconClass: icon-wordpress
+    openshift.io/display-name: A Db2 quick installp
+    openshift.io/documentation-url: https://www.ibm.com/docs/en/db2/11.5?topic=system-linux
+    openshift.io/long-description: This template defines resources to start a db2
+      database community edition as a quick click trough definition.
+    openshift.io/provider-display-name: Daniel Casali
+    openshift.io/support-url: https://dancasali.com
+    samples.operator.openshift.io/version: 4.10.6
+    tags: quickstart
+    template.openshift.io/bindable: "false"
+  labels:
+    samples.operator.openshift.io/managed: "true"
+  name: a-db2-install
+  namespace: openshift
+objects:
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    name: db2-db
+  spec:
+    volumeMode: Filesystem  # Optional. The default is Filesystem.
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 1Gi
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      deployment.kubernetes.io/revision: "1"
+    labels:
+      app: db2
+      app.kubernetes.io/component: db2
+      app.kubernetes.io/instance: db2
+      app.kubernetes.io/name: db2
+      app.kubernetes.io/part-of: db2
+      app.openshift.io/runtime: db2
+    name: db2
+  spec:
+    selector:
+      matchLabels:
+        app: db2
+    template:
+      metadata:
+        labels:
+          app: db2
+          deploymentconfig: db2
+      spec:
+        containers:
+        - image: icr.io/db2_community/db2
+          imagePullPolicy: Always
+          name: db2
+          resources:
+            requests:
+              cpu: 1
+          env:
+          - name: LICENSE
+            value: accept
+          - name: DB2INSTANCE
+            value: db2inst1
+          - name: DB2INST1_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: db2-pass
+                key: password
+          - name: DBNAME
+            value: testdb
+          - name: BLU
+            value: "false"
+          - name: ENABLE_ORACLE_COMPATIBILITY
+            value: "false"
+          - name: UPDATEAVAIL
+            value: "NO"
+          - name: TO_CREATE_SAMPLEDB
+            value: "false"
+          - name: REPODB
+            value: "false"
+          - name: IS_OSXFS
+            value: "false"
+          - name: PERSISTENT_HOME
+            value: "true"
+          - name: HADR_ENABLED
+            value: "false"
+          - name: ETCD_ENDPOINT
+            value:
+          - name: ETCD_USERNAME
+            value:
+          - name: ETCD_PASSWORD
+            value:
+          ports:
+          - containerPort: 50000
+            protocol: TCP
+          volumeMounts:
+          - mountPath: /database
+            name: db2-db
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        terminationGracePeriodSeconds: 30
+        volumes:
+        - name: db2-db
+          persistentVolumeClaim:
+            claimName: db2-db
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      app: db2
+      app.kubernetes.io/component: db2
+      app.kubernetes.io/instance: db2
+      app.kubernetes.io/name: db2
+      app.kubernetes.io/part-of: db2
+      app.openshift.io/runtime-version: latest
+    name: db2
+  spec:
+    ports:
+    - name: 50000-tcp
+      port: 50000
+      protocol: TCP
+      targetPort: 50000
+    selector:
+      app: db2
+      deploymentconfig: db2
+    type: ClusterIP
+- apiVersion: v1
+  data:
+    password: cGFzc3cwcmQ=
+  kind: Secret
+  metadata:
+    name: db2-pass
+  type: Opaque
