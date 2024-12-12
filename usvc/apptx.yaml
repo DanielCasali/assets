@@ -817,7 +817,7 @@ spec:
     spec:
       containers:
       - name: user
-        image: image-registry.openshift-image-registry.svc:5000/sock-shop/user
+        image: quay.io/daniel_casali/usvc-user
         resources:
           limits:
             cpu: 300m
